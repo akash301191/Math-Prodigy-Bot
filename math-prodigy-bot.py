@@ -171,6 +171,8 @@ def main() -> None:
         st.markdown("## 🧮 Solution")
         st.write(st.session_state.solution)
 
+        st.markdown("⚠️ **Disclaimer:** This bot may occasionally misinterpret or inaccurately solve certain math problems.Please review outputs before relying on them.")
+
         st.markdown("---")
 
         st.download_button(
