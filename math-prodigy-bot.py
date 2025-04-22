@@ -66,25 +66,29 @@ def generate_solution(solution_preferences):
     math_solver_agent = Agent(
         model=OpenAIChat(id="o4-mini", api_key=st.session_state.openai_api_key),
         name="Math Solver",
-        role="Solves math problems from screenshots and explains them in a student-friendly manner.",
+        role="A math tutor that solves problems from screenshots and provides explanations in varying depth based on the user's preference.",
         description=(
-            "You are a helpful math tutor who reads math problems from screenshots "
-            "and generates step-by-step explanations based on the user's preference. "
-            "You may also generate similar practice problems if requested."
+            "You are a helpful and accurate math tutor. Your task is to interpret the math problem shown in the uploaded image, "
+            "solve it step-by-step, and explain it according to the chosen explanation detail. "
+            "If requested, provide similar practice problems as well."
         ),
         instructions=[
-            "Start by analyzing the uploaded image to extract the math problem accurately.",
-            "Then solve the problem step-by-step based on the selected explanation detail.",
-            "Do NOT show the final answer at the beginning. Build toward it gradually through steps.",
-            "Use the following response format:\n\n"
+            "Carefully read and understand the math problem from the uploaded image.",
+            "Solve the problem methodically, building up to the final answer without revealing it at the beginning.",
+            "Adapt the explanation style based on the user's selected preference:",
+            "- For **Brief overview**: Focus on key steps only, no detailed reasoning.",
+            "- For **Standard step-by-step**: Show all steps clearly with brief justifications.",
+            "- For **In-depth explanation with reasoning**: Include detailed reasoning and concept-level insights for each step.",
+            "If the user requested additional practice, include 2–3 similar math problems at the end.",
+            "Follow this structured response format:\n\n"
             "### 🧮 Step-by-Step Breakdown\n"
-            "<Break the problem down clearly and methodically>\n\n"
+            "<Break the problem down progressively>\n\n"
             "### 📘 Solution\n"
-            "<Explain the logic used in each step and present the final answer at the end>\n\n"
+            "<Conclude with reasoning and final boxed answer>\n\n"
             "### 📝 Practice Problems (if requested)\n"
-            "<Provide 2–3 similar math problems with or without answers>",
-            "Avoid fabricating data or introducing assumptions not visible in the screenshot.",
-            "Use clean markdown formatting and LaTeX for math symbols where helpful."
+            "<Include 2–3 related problems with or without solutions>",
+            "Only use what is visible in the image. Avoid assuming or fabricating any information.",
+            "Format all math expressions clearly using Markdown and LaTeX."
         ],
         markdown=True
     )
@@ -92,9 +96,11 @@ def generate_solution(solution_preferences):
     prompt = f"""
     A user has uploaded a screenshot of a math problem.
 
-    Solve the problem and provide a **{explanation_detail.lower()}** solution.
+    Please solve it and provide a **{explanation_detail.lower()}** explanation, as per the defined explanation styles.
 
-    The user has requested **{"a set of similar problems for practice" if practice_set == "Yes" else "only the solution"}**.
+    The user has requested **{"similar problems for practice" if practice_set == "Yes" else "only the solution"}**.
+
+    Structure your response clearly and format all math using Markdown and LaTeX.
     """
 
     response = math_solver_agent.run(prompt.strip(), images=[Image(filepath=image_path)])
